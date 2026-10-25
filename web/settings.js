@@ -148,19 +148,21 @@ VIEWS.settings = async function () {
   $("#pl-custom").onchange = e => { const v = Math.max(15, Math.round(+e.target.value || 0)); if (v) save({ plan_minutes: v }); };
   // ---- coach: which Ollama models are here
   const coachModels = async () => {
-    const el = $("#coach-models"); if (!el) return;
+    if (!$("#coach-models")) return;
     const c = await api("GET", "/api/coach/status").catch(() => null);
+    const el = $("#coach-models"); if (!el) return;   // looked up after the wait: Settings may have redrawn meanwhile
     if (!c || !c.running) { el.innerHTML = `Ollama isn't running on this Mac. Open the Ollama app (or run <code>ollama serve</code>); new to it? Get it at ollama.com and <code>ollama pull gemma3:4b</code>. Then <a href="#" id="coach-re">check again</a>.`;
-      if ($("#coach-re")) $("#coach-re").onclick = e => { e.preventDefault(); el.textContent = "Looking…"; coachModels(); }; return; }
+      if ($("#coach-re", el)) $("#coach-re", el).onclick = e => { e.preventDefault(); el.textContent = "Looking…"; coachModels(); }; return; }
     if (!c.models.length) { el.innerHTML = `Ollama is running but has no models yet: <code>ollama pull gemma3:4b</code>`; return; }
     el.innerHTML = `<select id="coach-model">${["", ...c.models].map(mm => `<option value="${esc(mm)}" ${mm === (s.coach_model || "") ? "selected" : ""}>${mm ? esc(mm) : "Pick a model…"}</option>`).join("")}</select> <span class="muted small">smaller models answer faster</span>`;
-    $("#coach-model").onchange = e => save({ coach_model: e.target.value });
+    $("#coach-model", el).onchange = e => save({ coach_model: e.target.value });
   };
   coachModels();
   // ---- backups
   const backups = async () => {
-    const el = $("#backups"); if (!el) return;
+    if (!$("#backups")) return;
     const b = await api("GET", "/api/backups").catch(() => null);
+    const el = $("#backups"); if (!el) return;   // looked up after the wait: Settings may have redrawn meanwhile
     if (!b) { el.textContent = ""; return; }
     const when = t => new Date(t * 1000).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
     const mb = x => (x / 1e6).toFixed(1) + " MB";
@@ -168,9 +170,9 @@ VIEWS.settings = async function () {
       <div class="row" style="gap:8px;margin-bottom:6px"><button class="sm" id="bk-now">Back up now</button><button class="sm ghost" id="bk-show">Show in ${esc(S.status?.file_manager || "Finder")}</button>
         <span class="muted small">${b.backups.length ? `${b.backups.length} kept; a new one each week on its own` : "A backup is made each week on its own; none yet"}</span></div>
       ${b.backups.slice(0, 5).map(x => `<div class="bk-row"><span>${when(x.at)}</span><span class="muted small">${x.kind === "auto" ? "automatic" : "manual"} · ${mb(x.bytes)}</span><button class="sm ghost" data-restore="${esc(x.name)}">Restore</button></div>`).join("")}`;
-    $("#bk-now").onclick = async () => { $("#bk-now").disabled = true; try { await api("POST", "/api/backups"); toast("Backed up"); } catch (e) { toast(e.message, true); } backups(); };
-    $("#bk-show").onclick = () => api("POST", "/api/backups/reveal");
-    if ($("#bk-cancel")) $("#bk-cancel").onclick = async e => { e.preventDefault(); await api("POST", "/api/backups/cancel"); backups(); };
+    $("#bk-now", el).onclick = async () => { $("#bk-now", el).disabled = true; try { await api("POST", "/api/backups"); toast("Backed up"); } catch (e) { toast(e.message, true); } backups(); };
+    $("#bk-show", el).onclick = () => api("POST", "/api/backups/reveal");
+    if ($("#bk-cancel", el)) $("#bk-cancel", el).onclick = async e => { e.preventDefault(); await api("POST", "/api/backups/cancel"); backups(); };
     $$("[data-restore]", el).forEach(btn => btn.onclick = async () => {
       if (!btn.dataset.armed) { btn.dataset.armed = 1; btn.textContent = "Replace today's data?"; return; }
       try { const r = await api("POST", "/api/backups/restore", { name: btn.dataset.restore }); toast(`Ready: ${r.games.toLocaleString()} games. Quit and reopen the app to finish.`); }
@@ -222,11 +224,11 @@ VIEWS.settings = async function () {
 
 // V11: Follow Palette - a switch and a setup check (Palette is a separate theme-switcher app)
 async function paletteSettings() {
-  const box = $("#pal-box"); if (!box) return;
-  const on = !!S.settings.follow_palette;
+  if (!$("#pal-box")) return;
   let st = PAL.s;
   if (!st) { try { st = await api("GET", "/api/palette"); } catch (e) { st = null; } }
-  if (!$("#pal-box")) return;
+  const box = $("#pal-box"); if (!box) return;   // looked up after the wait: Settings may have redrawn meanwhile
+  const on = !!S.settings.follow_palette;
   const rows = st ? [
     [st.installed, "Palette is installed", "Found its folder (~/.config/palette).", "Install Palette (a theme switcher for the whole desktop) and pick a theme once."],
     [st.active, "A theme is active", st.theme ? `Current theme: ${esc(st.theme)}.` : "Palette has picked a theme.", "Pick a theme in Palette."],
@@ -238,7 +240,7 @@ async function paletteSettings() {
     ${on && st?.valid ? `<div class="pal-now"><span class="pal-sw">${st.swatches.map(c => `<b style="background:${c}"></b>`).join("")}</span> Now: <b>${esc(st.theme)}</b>${st.accent_swapped ? ` <span class="muted small">(its red/orange/yellow accent is swapped so it doesn't look like a mistake label)</span>` : ""}</div>` : ""}
     ${on ? `<ul class="pal-checks">${rows.map(([ok, t, good, fix]) => `<li class="${ok ? "ok" : "bad"}"><span class="${ok ? "status-ok" : "status-no"}">${ok ? "✓" : "✕"}</span><div><b>${t}</b><div class="muted small">${ok ? good : fix}</div></div></li>`).join("")}</ul>` : ""}
     <div style="height:10px"></div>`;
-  $("#pal-on").onchange = async e => {
+  $("#pal-on", box).onchange = async e => {
     try { S.settings = await api("POST", "/api/settings", { follow_palette: e.target.checked }); } catch (err) { toast(err.message, true); return; }
     PAL.s = null; await paletteSync(); paletteSettings();
     toast(e.target.checked ? (PAL.s?.valid ? "Following Palette: " + PAL.s.theme : "Palette isn't ready yet: see the checks") : "Stopped following Palette");

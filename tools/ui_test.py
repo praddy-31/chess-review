@@ -16,6 +16,22 @@ import urllib.parse
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# UI_SLOW=4 runs the page with the CPU 4x slower, like a CI runner, to catch races
+SLOW = float(os.environ.get("UI_SLOW") or 0)
+
+
+def errline(e) -> str:
+    """A page error with the line it came from (the stack's first frame)."""
+    where = (getattr(e, "stack", "") or "").splitlines()[1:2]
+    return f"{e} @ {where[0].strip() if where else '?'}"
+
+
+def slow(page):
+    if SLOW > 1:
+        page.context.new_cdp_session(page).send("Emulation.setCPUThrottlingRate", {"rate": SLOW})
+    return page
+
+
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "shots")   # in the project (gitignored), so they are easy to find
 os.makedirs(OUT, exist_ok=True)
 DATA = tempfile.mkdtemp(prefix="cr-ui-")
@@ -49,9 +65,9 @@ from playwright.sync_api import sync_playwright  # noqa: E402
 try:
     with sync_playwright() as pw:
         br = pw.chromium.launch()
-        page = br.new_page(viewport={"width": 1320, "height": 900})
+        page = slow(br.new_page(viewport={"width": 1320, "height": 900}))
         errors = []
-        page.on("pageerror", lambda e: errors.append(str(e)))
+        page.on("pageerror", lambda e: errors.append(errline(e)))
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
 
         # first run: the welcome, then (skipped) an empty library
@@ -799,9 +815,9 @@ try:
     check(st["engines"]["stockfish"] is None and st["engines"]["lc0"] is None, "clean computer: no engines found (fake PATH)")
     with sync_playwright() as pw:
         br = pw.chromium.launch()
-        page = br.new_page(viewport={"width": 1320, "height": 900})
+        page = slow(br.new_page(viewport={"width": 1320, "height": 900}))
         errors = []
-        page.on("pageerror", lambda e: errors.append(str(e)))
+        page.on("pageerror", lambda e: errors.append(errline(e)))
         page.goto(f"{BASE}/#uitoken123"); page.wait_for_selector(".wl-step")
         txt = page.inner_text("#main")
         check(st["engines"]["setup"]["stockfish"] in txt and page.locator("#wl-recheck").count() == 1, "clean: the welcome gives the install command and Check again")
