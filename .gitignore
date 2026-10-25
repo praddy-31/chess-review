@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+engine/.venv/
+engine/build/
+# Tauri / node
+tauri/node_modules/
+tauri/src-tauri/target/
+tauri/src-tauri/gen/
+# macOS
+.DS_Store
+
+
+# UI test screenshots (tools/ui_test.py)
+shots/
+
+# files the owner will delete (moved aside, not removed)
+to_delete/

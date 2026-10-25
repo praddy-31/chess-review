@@ -1,0 +1,25 @@
+name: Idea
+description: Suggest a feature or a change
+labels: [idea]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Some things the app won't do, by design: accounts or cloud features, telemetry,
+        anything automatic in the background, or bundling the engines. CONTRIBUTING.md has the list.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you're trying to do
+      description: The problem or the moment in your training where this would help.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you'd like
+  - type: textarea
+    id: grading
+    attributes:
+      label: Does it change how moves are graded?
+      description: Labels, puzzles, drills and schedules need their effect shown on real games (CONTRIBUTING.md, "Changing how moves are graded").

@@ -1,0 +1,44 @@
+name: Bug report
+description: Something doesn't work as it should
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting. A few details make it much quicker to fix.
+  - type: dropdown
+    id: system
+    attributes:
+      label: System
+      options:
+        - macOS (Apple silicon, release build)
+        - macOS (built from source)
+        - Windows (built from source)
+        - Linux (built from source)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Settings > Engines & data > Version.
+      placeholder: "3.0.0"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead. A screenshot helps.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: The end of engine.log
+      description: "In the data folder (the README's \"Your data\" lists it per system). Check it for anything you'd rather not share first."
+      render: text
+  - type: input
+    id: engines
+    attributes:
+      label: Engines
+      description: Stockfish version, and whether lc0 / Maia are installed (Setup shows them).

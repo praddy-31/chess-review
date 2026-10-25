@@ -1,0 +1,16 @@
+{
+  "name": "chess-review-tauri",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Native (Tauri v2) shell for Chess Review: starts the local engine process and opens its window.",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "node ../tools/build_app.mjs",
+    "icons": "tauri icon ../assets/icon.png"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

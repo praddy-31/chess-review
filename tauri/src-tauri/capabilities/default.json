@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The main window only shows the local engine's page; it needs no native APIs.",
+  "windows": ["main", "error"],
+  "permissions": ["core:default"]
+}

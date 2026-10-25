@@ -1,0 +1,97 @@
+# Changelog
+
+What each milestone added, oldest first.
+
+- **V1 and V2:** done.
+- **V3 Explain:** done.
+  - **Explanations:** every flagged move, yours and your opponent's, gets a plain sentence built from the engine lines. The rules are mate, back-rank mate, fork, discovered check, undefended piece, pin, promotion and material won. A material claim is only made when the eval backs it up.
+  - **Review:** key moments and retry-this-move. You click a piece, then a square; Stockfish grades the move, and attempts are stored for V4 puzzles.
+  - **Redesign:** the Review screen follows the design canvas. The board takes exactly half the window with the eval graph under it, the sidebar collapses (⌘\), and there is a summary sentence and a face-off view.
+  - **Clock card:** the time-per-move bars are mirrored, with a clock-budget bar per player.
+- **Looks:** 20 dark and 4 light themes, 4 piece sets (Classic, Merida, Chessnut, Fantasy), and the bundled Atkinson Hyperlegible Next typeface.
+- **Clock thresholds:** they come from a per-move budget, the starting clock divided by a typical game length plus the increment. The typical length is 40 moves until you have 30+ games of that time control, then your own median. A snap move is under ⅓ of the budget, a long think over 3×, and a low clock under 4× left.
+- **Grading (Oct 2026):** this follows chess.com's definitions.
+  - **Bands:** Inaccuracy 5–10, Mistake 10–20 and Blunder 20+ points of win chance; Good is under 5.
+  - **Brilliant:** the engine's move, and after a short capture-only search (both sides may capture anywhere, or stop) you are 2+ points of material down. Another legal move must have kept that material, so check escapes and pieces lost anyway don't count, and neither do trades or counter-threats that win it straight back. It also doesn't count when you were already winning (90%+), when you are worse after it, or when it is a recapture.
+  - **Great:** either the only good move (the next best costs 20+ points), or the move right after the opponent's mistake that turns the game from losing to equal, or equal to winning, when the next best move keeps less than half of that swing.
+  - **Explanations:** one short verdict line plus tags.
+- **V4 Train:** done.
+  - **What if:** drag or click a piece on any Review position to play your own idea. Three live engine lines show what it's worth; click an engine move to play it, or open the whole thing on the Board.
+  - **Engine strength** on the Board and in what-if: Low (depth 14, 1 core, 15 s), Medium (depth 20, 2 cores, 45 s) or High (depth 30, all the cores in Settings, 90 s).
+  - **Board:** an analysis board with drag and click moves, legal-move dots and a short slide (off when the Mac's reduce-motion setting is on). It has live MultiPV-3 lines, a move tree with side lines, FEN load and copy, saved lines, and the opening name of the current line.
+  - **Puzzles:** built from your analysed games. They come from your mistakes and missed chances, your unsolved retries, and (on by default) the position after your opponent's mistake, where you find the punishing move.
+    - **Tactics** have one clear answer: the best move is 10+ points better than the second best. **Better move** puzzles are your errors where several moves were fine, and any move within 3 points of the best counts.
+    - **Hints** go piece → square → answer.
+    - **A miss** stays on the board with their answer drawn as a red arrow until you press Retry (R). Finding it after a miss shows green "Solved, on try 2", but it still comes back tomorrow.
+    - **After a puzzle:** the start position comes back with numbered arrows for the engine line, your game move in orange, and their threat in red. A why line covers each, and you can step through the whole engine line with ← →.
+    - **Scheduling:** spaced repetition with a daily number (10 by default, set in Settings). Solved puzzles come back after 1 day, then 3, then longer each time; failed ones come back tomorrow.
+- **V5 Openings:** done.
+  - **Opening tree:** built from all your games, analysed or not. For each position it shows your moves (or their replies) with games, win/draw/loss, score and the engine's average eval from analysed games. It can be filtered by colour, time control and period.
+  - **Line scan:** your weakest and best lines in the first 16 half-moves, one per opening name.
+  - **Repertoire:** star a move in any position where it's your turn, or let the app star your most-played moves. It follows a line while at least 3 games and 3% of your games still reach it, capped by rating: 6 / 8 / 10 / 12 of your moves below 1000 / 1400 / 1800 / higher. You see coverage per colour and where you left your repertoire, and Review marks the move where a game left it.
+  - **Drills:** replaced on Oct 4 by line-by-line study (below).
+- **Library:** select any games and delete them. Deleted games are remembered so Sync doesn't bring them back, unless you tick "Bring back the games I deleted" in Settings.
+- **Selective sync:** Settings > Sync limits downloads to a period (last 3 / 6 / 12 / 24 months or since a date), chosen time controls and an opponent rating range. chess.com months before the period aren't fetched. A button removes synced games outside the filters; widen the filters and the next Sync brings them back.
+- **Settings** is one column with section links. Library tables fit any window width: long names truncate (hover for the full text) and minor columns drop as the table narrows.
+- **Storage:** reviews are stored compressed, about 7 KB per analysed game instead of about 60 KB. 3,950 games take about 22 MB with the opening index: about 2.4 KB of PGN plus 1.7 KB of index per game. 10,000 games would be about 55 MB, plus about 70 MB if every one is analysed.
+- **Learn an opening (V6):** the "+ Learn an opening" button on Openings opens a picker.
+  - **Finding one:** "What you play now" shows openings from your last 90 days, ranked by recent games rather than all-time. You can also search the 3,600 named lines.
+  - **Adding it:** pick a colour and add. The app stars your moves along the line, then the main line (the most theory below it, among the moves Stockfish rates within half a pawn of the best), with every named reply as a branch. Past the end of theory, Stockfish adds moves up to your depth cap.
+  - **Learning list:** the opening appears under "Openings you're learning" with its progress and a drill for just that opening.
+  - **Tree and building:** the tree also shows main theory moves you haven't played yet, so you can star them. "Build from my games" follows the time filter, so "Last 3 months" builds from what you play now.
+  - **Theory data:** the theory tree (`engine/data/theory.json`) is built from the opening list by `tools/make_theory.py`.
+- **V6 Insights:** done. Insights is now "Where your points go", with a time-control and period filter.
+  - **Weekly focus:** three suggested leaks, each with how it is measured. Pick one and it shows before and since; after a week, pick the next.
+  - **Skill profile:** six scores from 0 to 100: Opening, Tactics, Converting, Defending, Endgame and Time. Each shows its game count and its change against the previous period.
+  - **Period comparison:** games, score, performance rating (average opponent + 400 × (W − L) / N), rating per time control, accuracy, blunders and losses on time.
+  - **Charts and cards:** a rating chart with monthly performance, tilt (score after a win, a loss and two losses), long sessions, endgame conversion and saves by type, and clock (time at move 30 against your opponent, losses and wins on time, time trouble).
+  - **Coverage:** "Analyse my last 50 / 100" queues your recent games when the skill numbers rest on too few analysed games. You start it yourself; it's never automatic.
+  - **More detail:** the V2 tables are kept there.
+
+- **Openings, study line by line (Oct 4):** Openings opens on Study; the V5 tree is under "Your games".
+  - **Lines** run from where your repertoire starts to its end; each opponent reply your repertoire answers is its own line. Lines you meet most in your games come first.
+  - **A new line** is played out move by move with arrows and names, then you play it back from the start. Same-day steps follow (about 10 minutes later, then at the end of the session), then reviews after 1, 3, 7, 16, 35, 80 and 180 days. A miss sends a line back to the same-day steps. **Learned** = a clean review 7+ days after you learned it.
+  - **Daily numbers:** 3 new lines a day (Settings), plus every review that's due; "Learn 3 more" adds some. Practice rounds after that don't change the schedule. In one session, moves you just played in another line are filled in.
+  - **Your games:** when a game leaves a line you're reviewing at one of your moves, the line moves one step back (due in 7 days becomes 3). Study lists recent games where you or they left your lines, with "Review it now" and "Add my answer".
+  - **Length** of an opening you learn: 1-5, 3 = the recommendation for your rating, 5 = to the end of named theory plus 4 of your moves from Stockfish; change it on the opening's card. Repertoires built from your games now need 1% of your games (was 3%).
+  - **Lichess explorer** (optional, off): what's played at your level, for the opponent's moves. It needs a Lichess personal token since 2025.
+- **V7:**
+  - **Welcome:** the first start walks through usernames, Stockfish, which games to sync, and a first sync plus "analyse my last 10".
+  - **Ask the coach** (Board): pick the last move or type one; Stockfish compares it with the best move (depth 18) and the motif detector reads both lines. With Ollama running and a model picked in Settings, a local model puts those facts into a few sentences; moves it names that aren't in the facts are flagged.
+  - **Notes and tags:** a note on a game or on any move, tags on games; the Library shows them, filters by tag and finds notes by search. They're added to the Obsidian export.
+  - **Mistakes you repeat** (Insights): your errors grouped by what went wrong (walking into forks, leaving pieces hanging, missing mates…), with how often, lately vs before, examples, and "Practise these" with exactly those puzzles.
+  - **Weekly note** (Insights): Markdown for the week to copy into Obsidian.
+  - **Backups:** one each week on its own, "Back up now", Show in Finder, and Restore (it happens when the app next starts; today's data is kept as a backup first). The newest 10 are kept in the data folder's `backups`.
+
+- **V7 polish:**
+  - **Coach** looks at the position, not only the eval: material and imbalances, both kings (pawn shield, open files, attacks, back rank), pawn structure (passed, isolated, doubled), loose pieces, development, rooks on open files, piece activity, centre. It compares the position after your move with the position after the best one, checks threats both ways (what they threaten and whether your move deals with it; what your move threatens), and turns the best line into a plan (piece routes, pawn breaks, trades). With Maia it says what players at your rating play; from a Review it remembers your game move. Quick questions point at the section that answers them; with Ollama you can ask follow-ups about the same position.
+  - **Puzzles:** "one move or several?" before each puzzle (on by default, scored); an optional clock with your per-move time for that game's time control, where running over counts as slow (back sooner), not as a miss.
+  - **Empty states** for Insights; a refreshed app icon (`assets/icon.svg`).
+- **V8 (final milestone):**
+  - **Convert the win** (Puzzles > Convert the win): positions from games you drew or lost after being +3 or better (after move 8). You play them out against Maia at your opponent's rating, which picks among its likely moves so no two runs are the same; without Maia, Stockfish held to that rating. Stockfish only judges: converted at 95%+ win chance after 6 of your moves (or mate), slipped under 60% or on a draw. Shows your costliest move; spaced repetition with its own daily number.
+  - **Practical move:** with Maia, Review's move card and the Board's engine panel show the move players at your rating are most likely to find that is within 5 points of win chance of the engine's best, when it differs from the best.
+  - **Opponents:** players you have met twice or more get a page (from the Library, the Review header or Insights): your record by colour, what they open with against you and how you scored, the openings that worked, accuracy in analysed games, and a few tips.
+  - **Weekly study plan:** asked once (in the welcome, or the first start after updating) and changed or switched off in Settings > Study plan. Your weekly time is split across puzzles, opening study, convert drills and reviewing games, tilted toward your weekly focus and your most repeated mistake. Insights shows the plan and what to do next; the Library has a compact strip.
+  - **Licence:** GPL-3.0.
+- **V10 (Oct 2026):**
+  - **Annotated PGN export:** Review > Export > Annotated PGN, or tick games in the Library and press Export PGN (saved to Downloads). The game's own PGN with its clocks, plus the eval after every move as `[%eval]` (a Lichess study draws the graph from it), labels as NAGs (!! Brilliant, ! Great, ?! Inaccuracy, ? Mistake, ?? Blunder) for both sides, the verdict line as a comment, the engine's better line as a variation, your notes and a Tags header. Games not analysed yet export as they are.
+  - **By phase** (Insights): each game split into opening, middlegame and endgame by Lichess's divider (pieces left, development, how mixed the armies are). Your accuracy and points lost per move in each, month by month and against the period before, with a sentence on where you lose the most. A heatmap of the squares your mistakes and blunders land on, or where you lose pieces right after them, from your side of the board; click a square for the games.
+  - **Play** (new screen): a game against Maia at a rating you pick from the nets installed, as White, Black or random, with no clock (the default) or 3+2 to 15+10. Maia picks among the moves people at that rating play, so games vary; no takebacks. The game is saved to the Library as "vs Maia" and analysed only when you ask. Games against Maia stay out of Insights, opponents and the weekly note unless Settings counts them, and never enter your opening tree.
+  - **One set of phases** (grading 5): the Review's opening/middlegame/endgame bands, its phase accuracy and clock split, the opening and endgame move types and the Endgame skill all use Lichess's divider too, so a game has the same phases everywhere. The "Endgame at" setting is gone; "Opening lasts" became "Book moves count until move".
+- **V11 (Oct 2026):**
+  - **Windows, Linux and Intel Macs** can build from source (`npm run build` no longer needs bash; community-supported, not yet tested on those systems); the data folder, the engine search, Setup's install commands and "show in folder" follow the system.
+  - **First run on a clean computer:** without Stockfish, Analyse says how to install it on your system instead of queueing games that would fail, and the Library says so with a link to Setup.
+  - **First-visit notes:** each screen explains itself in a short note the first time you open it (the Review's covers win-chance points and the labels); × hides it for good and Settings > Appearance brings them back.
+  - **Settings** shows the app's version (Engines & data).
+  - **Follow Palette** (Settings > Appearance, off by default): the app's colours follow the Palette theme switcher, live, with a setup check. Move labels and the board keep their colours; an accent that would look like an error label is swapped.
+  - **Play:** Pause stops both clocks and covers the board; leaving Play pauses a timed game; an unfinished game is kept, even after quitting the app.
+  - **Review:** a Notes tab lists the game note and every move note.
+  - **Setup** lists Maia nets that are missing and fetches only those.
+  - **Your rating from your games:** your latest rating in each time control (on the site where you play it most) replaces the typed number; each review compares you with Maia at that game's own rating. Settings shows them and keeps a manual option.
+  - **Initiative:** the Attack / Neutral / Defense per move is now shown as initiative (attacking, defending), so "phase" means only opening, middlegame and endgame.
+  - **Play:** clocks from 1+0 to 30+20, plus your own.
+  - **Review** names the Maia level it compared you with (Summary: "Maia 1200, nearest your 1171 rating in this game").
+  - **Library:** games against Maia no longer link to an empty opponent page.
+  - **New app identifier** `io.github.praddy-31.chess-review`; your data folder doesn't move.
+  - **For contributors:** CONTRIBUTING.md, issue forms, a Privacy section and per-system install and build steps in the README.
+  - **The v2 import is gone:** Setup, Settings and the empty Library no longer offer to import the old browser app's games, and the app no longer reads Maia weights or the book from the old app's folder. (It copied every reviewed game, analysis included, and listed the old app's leftovers: its LaunchAgent, `streamlit.log` and about 560 MB of Python packages.)

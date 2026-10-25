@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # The two checks every change must pass, on an Apple silicon Mac like the release.
+  checks:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Stockfish
+        run: brew install stockfish
+      - name: Engine environment
+        run: |
+          python -m venv engine/.venv
+          engine/.venv/bin/pip install -r engine/requirements.txt playwright
+          engine/.venv/bin/python -m playwright install chromium
+      - name: Self-test
+        working-directory: engine
+        run: .venv/bin/python selftest.py
+      - name: UI test
+        run: engine/.venv/bin/python tools/ui_test.py
+      - name: Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screenshots
+          path: shots/
+          if-no-files-found: ignore
+
+  # Building from source works on each system (Windows and Linux are community-supported).
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, ubuntu-22.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: tauri/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: tauri/src-tauri
+      - name: Linux packages for Tauri
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+      - name: Build
+        working-directory: tauri
+        env:
+          NO_OPEN: "1"
+        run: |
+          npm ci
+          npm run build
