@@ -17,11 +17,13 @@ function run(cmd, args, opts = {}) {
   return r.status === 0;
 }
 
-// any Python 3.10+ works: the script makes engine/.venv itself
+// any Python 3.10+ works: the script makes engine/.venv itself. Python is started without a
+// shell: on Windows cmd.exe would read the "<" in the version check as a redirect (and split
+// paths with spaces), so every Python looked missing.
 const pythons = win ? [["py", ["-3"]], ["python", []]] : [["python3", []], ["python", []]];
-const py = pythons.find(([c, a]) => spawnSync(c, [...a, "-c", "import sys; sys.exit(sys.version_info < (3, 10))"], { shell: win }).status === 0);
+const py = pythons.find(([c, a]) => spawnSync(c, [...a, "-c", "import sys; sys.exit(sys.version_info < (3, 10))"]).status === 0);
 if (!py) { console.error("No Python 3.10+ found: install it from python.org (or your package manager)"); process.exit(1); }
-if (!run(py[0], [...py[1], join(root, "tools", "build_engine.py")])) process.exit(1);
+if (!run(py[0], [...py[1], join(root, "tools", "build_engine.py")], { shell: false })) process.exit(1);
 
 // CI=true: no Finder window dressing for the DMG, which needs a logged-in GUI
 if (!run("npx", ["tauri", "build"], { cwd: tauri, env: { ...process.env, CI: "true" } })) process.exit(1);

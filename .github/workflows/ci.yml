@@ -29,6 +29,7 @@ jobs:
         working-directory: engine
         run: .venv/bin/python selftest.py
       - name: UI test
+        if: ${{ !cancelled() }}   # run even when the self-test failed, to see both
         run: engine/.venv/bin/python tools/ui_test.py
       - name: Screenshots
         if: always()
